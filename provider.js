@@ -1,68 +1,79 @@
 // provider.js for witanime.life
 
-class WitAnimeProvider {
-  async search(query) {
-    const searchUrl = `https://witanime.life/?s=${encodeURIComponent(query)}`;
-    const response = await fetch(searchUrl, { credentials: 'omit' });
-    const html = await response.text();
+function WitAnimeProvider() {}
 
-    const results = [];
-    const itemRegex = /<a[^>]+href="([^"]+)"[^>]*>\s*<div[^>]*class="thumb"[^>]*>[\s\S]*?<h2[^>]*>([^<]+)<\/h2>/gi;
-    let match;
+WitAnimeProvider.prototype.search = function (query) {
+  var searchUrl = 'https://witanime.life/?s=' + encodeURIComponent(query);
+  var html = fetchContent(searchUrl);
+  var results = [];
+  var itemRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>(?:[\s\S]*?<h[12][^>]*>([^<]+)<\/h[12]>|([^<]+?))<\/a>/gi;
+  var match;
 
-    while ((match = itemRegex.exec(html)) !== null) {
+  while ((match = itemRegex.exec(html)) !== null) {
+    var title = (match[2] || match[3] || '').trim();
+    if (title.length > 1) {
       results.push({
         id: match[1],
-        title: match[2].trim(),
+        title: title,
       });
     }
-
-    return results;
   }
 
-  async getEpisodes(animeId) {
-    const response = await fetch(animeId, { credentials: 'omit' });
-    const html = await response.text();
+  return results;
+};
 
-    const episodes = [];
-    const episodeRegex = /<a[^>]+href="([^"]+)"[^>]*>\s*<span[^>]*class="ep-num"[^>]*>([^<]+)<\/span>/gi;
-    let match;
+WitAnimeProvider.prototype.getEpisodes = function (animeId) {
+  var html = fetchContent(animeId);
+  var episodes = [];
+  var episodeRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>(?:[\s\S]*?<span[^>]*>([^<]+)<\/span>|([^<]+?))<\/a>/gi;
+  var match;
 
-    while ((match = episodeRegex.exec(html)) !== null) {
+  while ((match = episodeRegex.exec(html)) !== null) {
+    var title = (match[2] || match[3] || '').trim();
+    if (title.length > 0) {
       episodes.push({
         id: match[1],
-        title: match[2].trim(),
+        title: title,
       });
     }
-
-    return episodes;
   }
 
-  async getVideoSources(episodeId) {
-    const response = await fetch(episodeId, { credentials: 'omit' });
-    const html = await response.text();
+  return episodes;
+};
 
-    const sources = [];
-    const iframeRegex = /<iframe[^>]+src="([^"]+)"/gi;
-    const videoRegex = /<source[^>]+src="([^"]+)"/gi;
-    let match;
+WitAnimeProvider.prototype.getVideoSources = function (episodeId) {
+  var html = fetchContent(episodeId);
+  var sources = [];
+  var regexes = [
+    /<iframe[^>]+src=["']([^"']+)["']/gi,
+    /<source[^>]+src=["']([^"']+)["']/gi,
+  ];
+  var match;
 
-    while ((match = iframeRegex.exec(html)) !== null) {
+  for (var i = 0; i < regexes.length; i += 1) {
+    while ((match = regexes[i].exec(html)) !== null) {
       sources.push({
         url: match[1].trim(),
-        type: match[1].includes('.m3u8') ? 'hls' : 'iframe',
+        type: match[1].indexOf('.m3u8') !== -1 ? 'hls' : 'direct',
       });
     }
-
-    while ((match = videoRegex.exec(html)) !== null) {
-      sources.push({
-        url: match[1].trim(),
-        type: match[1].includes('.m3u8') ? 'hls' : 'direct',
-      });
-    }
-
-    return sources;
   }
+
+  return sources;
+};
+
+function fetchContent(url) {
+  if (typeof fetchUrl === 'function') {
+    return fetchUrl(url);
+  }
+  if (typeof request === 'function') {
+    return request(url);
+  }
+  if (typeof fetch === 'function') {
+    // Seanime likely does not support browser fetch, but keep this fallback.
+    throw new Error('Use fetchUrl or request in Seanime environment');
+  }
+  throw new Error('No supported HTTP request API available in Seanime provider');
 }
 
 module.exports = WitAnimeProvider;

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "leonkennedybatman-cmd",
   "type": "onlinestream-provider",
-  "language": "typescript",
+  "language": "javascript",
   "lang": "ar",
   "description": "Online streaming provider for Arabic subbed anime from witanime.life",
   "manifestURI": "https://raw.githubusercontent.com/leonkennedybatman-cmd/witanime1/main/manifest.json",
