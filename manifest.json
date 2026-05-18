@@ -1,0 +1,12 @@
+{
+  "id": "com.seanime.extension.witanime",
+  "name": "WitAnime (Arabic)",
+  "version": "1.0.0",
+  "author": "leonkennedybatman-cmd",
+  "type": "onlinestream-provider",
+  "language": "typescript",
+  "lang": "ar",
+  "description": "Online streaming provider for Arabic subbed anime from witanime.life",
+  "manifestURI": "https://raw.githubusercontent.com/leonkennedybatman-cmd/witanime1/main/manifest.json",
+  "payloadURI": "https://raw.githubusercontent.com/leonkennedybatman-cmd/witanime1/main/provider.js"
+}
